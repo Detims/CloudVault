@@ -1,0 +1,43 @@
+name: Deploy to local Minikube
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Published GHCR tag to deploy (for example, latest or sha-...)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy approved image tag to Minikube
+    runs-on: [self-hosted, cloudvault-minikube]
+    environment: local-minikube
+    steps:
+      - uses: actions/checkout@v6
+      - name: Select cluster context
+        run: kubectl config use-context minikube
+      - name: Apply Kubernetes resources
+        run: |
+          kubectl apply -f infra/k8s/namespace.yaml
+          kubectl apply -f infra/k8s/cassandra.yaml
+          kubectl apply -f infra/k8s/application.yaml
+      - name: Attach private GHCR pull secret
+        run: |
+          kubectl -n cloudvault patch deployment cloudvault-backend --patch-file infra/k8s/ghcr-pull-secret-patch.yaml
+          kubectl -n cloudvault patch deployment cloudvault-frontend --patch-file infra/k8s/ghcr-pull-secret-patch.yaml
+      - name: Update images
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          image_namespace="ghcr.io/${GITHUB_REPOSITORY,,}"
+          kubectl -n cloudvault set image deployment/cloudvault-backend backend="$image_namespace/backend:$IMAGE_TAG"
+          kubectl -n cloudvault set image deployment/cloudvault-frontend frontend="$image_namespace/frontend:$IMAGE_TAG"
+      - name: Wait for rollout
+        run: |
+          kubectl -n cloudvault rollout status deployment/cloudvault-backend --timeout=5m
+          kubectl -n cloudvault rollout status deployment/cloudvault-frontend --timeout=5m

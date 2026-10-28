@@ -1,0 +1,23 @@
+# Java / Maven
+backend/target/
+*.class
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Local-only configuration and credentials
+.env
+.env.*
+!.env.example
+**/application-local.yml
+**/application-local.yaml
+
+# IDE and operating-system files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+

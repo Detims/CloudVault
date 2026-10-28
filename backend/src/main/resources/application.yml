@@ -1,0 +1,54 @@
+server:
+  port: ${PORT:8080}
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        secure: ${SESSION_COOKIE_SECURE:false}
+        same-site: lax
+
+spring:
+  application:
+    name: cloudvault-api
+  cassandra:
+    contact-points: ${CASSANDRA_CONTACT_POINTS:localhost}
+    port: ${CASSANDRA_PORT:9042}
+    local-datacenter: ${CASSANDRA_LOCAL_DATACENTER:datacenter1}
+    keyspace-name: ${CASSANDRA_KEYSPACE:cloudvault}
+    schema-action: none
+    request:
+      timeout: 5s
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:local-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:local-client-secret}
+            scope:
+              - openid
+              - profile
+              - email
+  mvc:
+    problemdetails:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+cloudvault:
+  frontend-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
+  storage:
+    s3:
+      bucket: ${S3_BUCKET:}
+      region: ${AWS_REGION:us-west-2}
+      presign-minutes: ${S3_PRESIGN_MINUTES:5}
+      max-file-bytes: ${MAX_FILE_BYTES:26214400}
+

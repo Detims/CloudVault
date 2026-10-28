@@ -18,15 +18,16 @@ The backend has four conceptual parts: web/API types, application services, doma
 | Method and path | Purpose | Authentication |
 |---|---|---|
 | `GET /api/health` | Liveness response | Public |
+| `GET /api/csrf` | Set the browser's CSRF cookie before a write | Public |
 | `GET /api/me` | Current user profile | Signed in |
 | `GET /api/documents` | List only the current user's metadata | Signed in |
-| `POST /api/documents` | Create an upload intent and a short-lived S3 PUT URL | Signed in |
+| `POST /api/documents` | Create an upload intent and a short-lived S3 POST policy | Signed in |
 | `POST /api/documents/{id}/complete` | Confirm upload and mark metadata available | Signed in |
 | `GET /api/documents/{id}/download` | Create a short-lived S3 GET URL for an owned document | Signed in |
 | `DELETE /api/documents/{id}` | Delete owned metadata and object | Signed in |
 | `POST /logout` | End the server session | Signed in + CSRF token |
 
-The upload client sends bytes directly to S3 with the returned URL. The API will constrain file size, allowed content types, and key generation; it will not trust a client-provided object key. URL expiry is short. A document is not listed as available until its upload is confirmed. The API must check ownership before every read, download, completion, or delete operation.
+The upload client sends bytes directly to S3 with a short-lived presigned POST policy. The policy binds the generated key, content type, and exact expected size; S3 checks the policy before accepting the file. The API never trusts a client-provided object key. A document remains pending until its upload is confirmed and its stored size is checked again. The API checks ownership before every read, download, completion, or delete operation.
 
 ## Identity and browser security
 
@@ -39,12 +40,12 @@ The upload client sends bytes directly to S3 with the returned URL. The API will
 
 ## Data model
 
-`documents` is queried by authenticated owner and newest-first creation time, so the Cassandra partition key is the owner subject. The UUID is a clustering key to support stable per-owner listing and point lookup.
+`documents` is queried by authenticated owner, so the Cassandra partition key is the owner subject. The UUID is a clustering key for stable per-owner listing and point lookup. The UI sorts the returned metadata by `created_at`; UUID order is not treated as creation time.
 
 ```text
 documents (
   owner_id text,            -- OIDC subject, partition key
-  document_id timeuuid,     -- clustering key, descending
+  document_id uuid,         -- clustering key, descending
   file_name text,
   content_type text,
   size_bytes bigint,
@@ -59,7 +60,7 @@ Only the owner-partition query is supported. The API does not offer global listi
 
 ## Storage rules
 
-The S3 bucket stays private and blocks public access. Presigned URLs grant a single object operation for a short period. The backend role should have only the bucket/object actions required for this application. For local development, use real AWS credentials from the standard AWS credential chain; never put a long-lived access key in Kubernetes YAML. Encryption at rest and TLS in transit should be enabled on the bucket.
+The S3 bucket stays private and blocks public access. Presigned POST fields grant one constrained upload for a short period; GET URLs grant short-lived downloads. The backend role should have only the bucket/object actions required for this application. For local development, use real AWS credentials from the standard AWS credential chain; never put a long-lived access key in Kubernetes YAML. Encryption at rest and TLS in transit should be enabled on the bucket.
 
 ## Deployment boundary
 

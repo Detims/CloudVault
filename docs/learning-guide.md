@@ -8,7 +8,7 @@ Use this repository as a reference in small passes. Start with one request and t
 2. **Spring structure** — trace a controller into an application service, then into a repository or storage adapter. The controller should translate HTTP; it should not own policy.
 3. **OIDC and sessions** — inspect the Google client configuration, callback, principal mapping, session cookie, and CSRF token. Distinguish login (who the user is) from authorization (which document they may access).
 4. **Cassandra** — map each query to a table key. In Cassandra, choose the table around the reads the feature needs rather than treating it like a relational database.
-5. **S3 presigning** — follow upload intent, direct browser upload, completion, and download. The browser gets temporary access to one generated key; AWS credentials remain on the server.
+5. **S3 presigning** — follow upload intent, direct browser POST, completion, and download. The signed POST policy restricts the key, MIME type, and file size; AWS credentials remain on the server.
 6. **Containers and Kubernetes** — read the Dockerfile, ConfigMap, Secret references, probes, and service. Trace how a local image reaches Minikube.
 7. **GitHub Actions** — compare pull-request checks, GHCR publishing, and manually dispatched local deployment. Notice which permissions each workflow receives.
 

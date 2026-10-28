@@ -1,7 +1,6 @@
 package dev.cloudvault.api;
 
-import java.util.Map;
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.csrf.CsrfToken;
@@ -11,8 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class SessionController {
     @GetMapping("/api/csrf")
-    Map<String, String> csrf(CsrfToken token) {
-        return Map.of("headerName", token.getHeaderName(), "token", token.getToken());
+    ResponseEntity<Void> csrf(CsrfToken token) {
+        // Resolving the deferred token ensures CookieCsrfTokenRepository writes its readable cookie.
+        token.getToken();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/api/me")

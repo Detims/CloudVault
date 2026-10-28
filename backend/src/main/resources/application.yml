@@ -1,5 +1,6 @@
 server:
   port: ${PORT:8080}
+  forward-headers-strategy: framework
   servlet:
     session:
       cookie:
@@ -50,5 +51,5 @@ cloudvault:
       bucket: ${S3_BUCKET:}
       region: ${AWS_REGION:us-west-2}
       presign-minutes: ${S3_PRESIGN_MINUTES:5}
-      max-file-bytes: ${MAX_FILE_BYTES:26214400}
+      max-file-bytes: ${MAX_FILE_BYTES:25000000}
 

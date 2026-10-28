@@ -1,0 +1,33 @@
+services:
+  cassandra:
+    image: cassandra:5.0
+    container_name: cloudvault-cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      CASSANDRA_CLUSTER_NAME: cloudvault-local
+      CASSANDRA_DC: datacenter1
+      CASSANDRA_RACK: rack1
+      MAX_HEAP_SIZE: 512M
+      HEAP_NEWSIZE: 128M
+    volumes:
+      - cassandra-data:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh 127.0.0.1 9042 -e 'SELECT release_version FROM system.local' >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 45s
+
+  cassandra-schema:
+    image: cassandra:5.0
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    volumes:
+      - ./schema.cql:/schema.cql:ro
+    entrypoint: ["/bin/bash", "-ec"]
+    command: ["cqlsh cassandra 9042 -f /schema.cql"]
+
+volumes:
+  cassandra-data:

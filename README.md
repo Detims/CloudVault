@@ -14,6 +14,8 @@ CloudVault is a small portfolio application for securely storing private documen
 
 This is a portfolio MVP, not a production-ready document-management service. See [the architecture and security notes](docs/architecture.md), [the learning guide](docs/learning-guide.md), and [the two-week delivery plan](docs/milestones.md).
 
+For setup, environment variables, Google redirect URIs, and S3 bucket configuration, start with [the development guide](docs/development.md) and [the API reference](docs/api.md).
+
 ## Repository map
 
 ```text
@@ -27,7 +29,7 @@ docs/                    Architecture, setup, and learning reference
 
 ## Development status
 
-Initial repository scaffold. Follow [docs/development.md](docs/development.md) to bring up the local dependencies and start each app. Real Google and AWS credentials are intentionally not included. Keep them in an untracked local environment file or secret manager; never commit them.
+The application, development environment, and local deployment resources are implemented. Follow [docs/development.md](docs/development.md) to bring up Cassandra and start the apps. Real Google and AWS credentials are intentionally not included. Keep them in an untracked local environment file or secret manager; never commit them. Builds and live OAuth, S3, and Minikube flows still need to be run with your local credentials and tools.
 
 ## License
 

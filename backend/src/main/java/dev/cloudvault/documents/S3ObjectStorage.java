@@ -94,6 +94,7 @@ class S3ObjectStorage implements ObjectStorage {
         policy.put("conditions", conditions);
 
         try {
+            // S3 verifies the base64 policy and its SigV4 HMAC before accepting the multipart upload.
             var encodedPolicy = Base64.getEncoder().encodeToString(objectMapper.writeValueAsBytes(policy));
             fields.put("policy", encodedPolicy);
             fields.put("x-amz-signature", HexFormat.of().formatHex(signPolicy(credentials, dateStamp, encodedPolicy)));
@@ -149,6 +150,7 @@ class S3ObjectStorage implements ObjectStorage {
 
     private byte[] signPolicy(AwsCredentials credentials, String dateStamp, String encodedPolicy)
         throws GeneralSecurityException {
+        // SigV4 derives a short-lived signing key from the secret, UTC day, region, S3 service, and request scope.
         var dateKey = hmac(("AWS4" + credentials.secretAccessKey()).getBytes(StandardCharsets.UTF_8), dateStamp);
         var regionKey = hmac(dateKey, region);
         var serviceKey = hmac(regionKey, "s3");

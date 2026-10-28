@@ -3,7 +3,9 @@ package dev.cloudvault.api;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.web.servlet.MockMvc;
 
 import dev.cloudvault.security.SecurityConfiguration;
@@ -15,6 +17,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(HealthController.class)
 @Import(SecurityConfiguration.class)
 class HealthControllerTest {
+    @MockBean
+    private ClientRegistrationRepository clientRegistrationRepository;
+
     @Autowired
     private MockMvc mvc;
 
